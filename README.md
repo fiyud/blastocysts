@@ -1,5 +1,6 @@
 # blastocysts
 
+```bash
 /
 ├── train
 │   ├── normal
@@ -12,3 +13,4 @@
     ├── abnormal
     │   └── images
     └── info.json
+```
