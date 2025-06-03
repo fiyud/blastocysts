@@ -4,7 +4,8 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import torchvision.transforms as transforms
 import random
-
+from model import DualBackboneTimeLapseClassifier
+import torch
 
 class DualTimeLapseDataset(Dataset):
     def __init__(
@@ -31,7 +32,6 @@ class DualTimeLapseDataset(Dataset):
         self.reference_size = reference_size
         self.transform = transform or self._default_transforms()
         
-        # Load dataset info
         info_path = os.path.join(root_dir, split, 'info.json')
         if os.path.exists(info_path):
             with open(info_path, 'r') as f:
@@ -39,10 +39,8 @@ class DualTimeLapseDataset(Dataset):
         else:
             self.info = {}
         
-        # Build sample list
         self.samples = self._build_samples()
         
-        # Class mapping
         self.class_to_idx = {'normal': 0, 'abnormal': 1}
         self.idx_to_class = {v: k for k, v in self.class_to_idx.items()}
     
@@ -120,7 +118,6 @@ class DualTimeLapseDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.samples[idx]
         
-        # Load context frames
         context_sequence = []
         for img_path in sample['context_frames']:
             image = Image.open(img_path).convert('RGB')
@@ -128,7 +125,6 @@ class DualTimeLapseDataset(Dataset):
                 image = self.transform(image)
             context_sequence.append(image)
         
-        # Load reference frames
         reference_sequence = []
         for img_path in sample['reference_frames']:
             image = Image.open(img_path).convert('RGB')
@@ -136,23 +132,17 @@ class DualTimeLapseDataset(Dataset):
                 image = self.transform(image)
             reference_sequence.append(image)
         
-        # Stack into tensors
         context_tensor = torch.stack(context_sequence, dim=0)  # (context_size, 3, H, W)
         reference_tensor = torch.stack(reference_sequence, dim=0)  # (reference_size, 3, H, W)
         
         return context_tensor, reference_tensor, sample['class_idx']
 
-
-# Example training setup
 def create_dual_model_and_dataloader(
     data_root: str, 
     context_size: int = 5, 
     reference_size: int = 3,
     batch_size: int = 16
 ):
-    """Create dual-backbone model and dataloaders"""
-    
-    # Model
     model = DualBackboneTimeLapseClassifier(
         num_classes=2,
         context_size=context_size,
@@ -166,7 +156,6 @@ def create_dual_model_and_dataloader(
         dropout_rate=0.1
     )
     
-    # Datasets
     train_dataset = DualTimeLapseDataset(
         data_root, split='train', 
         context_size=context_size, 
@@ -178,7 +167,6 @@ def create_dual_model_and_dataloader(
         reference_size=reference_size
     )
     
-    # Dataloaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     
