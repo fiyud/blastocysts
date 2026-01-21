@@ -5,7 +5,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from structure.loaddate_aduc import create_dual_backbone_datasets, dual_backbone_collate_fn
+from structure.loaddata_aduc import create_dual_backbone_datasets, dual_backbone_collate_fn
+from model import DualBackboneTimeLapseClassifier
 
 def train_dual_backbone_model():
     config = {

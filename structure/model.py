@@ -164,10 +164,9 @@ class DualBackboneTimeLapseClassifier(nn.Module):
         
         if mask_reference is not None:
             mask_reference = mask_reference.long()
-            # Create attention mask (True means mask out)
             src_key_padding_mask = torch.zeros(batch_size, self.context_size + 1, 
                                              dtype=torch.bool, device=device)
-            src_key_padding_mask[:, -1] = mask_reference.squeeze()  # Mask reference token
+            src_key_padding_mask[:, -1] = mask_reference.squeeze()
         else:
             src_key_padding_mask = None
         
@@ -267,8 +266,8 @@ if __name__ == "__main__":
     reference_frames = torch.randn(4, 3, 3, 224, 224)  # batch=4, reference=3 frames
     
     logits = model(context_frames, reference_frames)
-    print(f"Output shape: {logits.shape}")  # Should be (4, 2)
+    print(f"Output shape: {logits.shape}")  # (4, 2)
     
     predictions = model.predict(context_frames, reference_frames)
-    print(f"Predictions shape: {predictions.shape}")  # Should be (4, 2)
+    print(f"Predictions shape: {predictions.shape}")  # (4, 2)
     print(f"Sample predictions: {predictions[0].numpy()}")  # Probabilities for first sample

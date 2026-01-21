@@ -173,7 +173,6 @@ class EmbryoVideoDualBackboneDataset(Dataset):
             dummy_frame = torch.zeros(3, 224, 224)
             frames = [dummy_frame] * max(self.context_size, self.reference_size)
         
-        # Sample context and reference frames
         context_frames, reference_frames = self._sample_context_and_reference_frames(frames)
         
         return {
@@ -182,12 +181,7 @@ class EmbryoVideoDualBackboneDataset(Dataset):
             'label': label
         }
 
-
-# Updated data loading code
 def create_dual_backbone_datasets(root_dir, context_size=5, reference_size=3, sampling_strategy='temporal_split'):
-    """
-    Create train and test datasets for dual backbone model
-    """
     transform = T.Compose([
         T.Resize((224, 224)),
         T.ToTensor(),
@@ -211,29 +205,21 @@ def create_dual_backbone_datasets(root_dir, context_size=5, reference_size=3, sa
         max_frames=None,
         context_size=context_size,
         reference_size=reference_size,
-        sampling_strategy='uniform'  # Use deterministic sampling for test
+        sampling_strategy='uniform'
     )
     
     return train_dataset, test_dataset
 
-
-# Custom collate function for DataLoader
 def dual_backbone_collate_fn(batch):
-    """
-    Custom collate function to handle the dual backbone data structure
-    """
     context_frames = torch.stack([item['context_frames'] for item in batch], dim=0)
     reference_frames = torch.stack([item['reference_frames'] for item in batch], dim=0)
     labels = torch.tensor([item['label'] for item in batch], dtype=torch.long)
     
     return context_frames, reference_frames, labels
 
-
-# Example usage
 if __name__ == "__main__":
     root_dir = 'D:/stroke/embryo/vin_embryov2/'
     
-    # Create datasets
     train_dataset, test_dataset = create_dual_backbone_datasets(
         root_dir=root_dir,
         context_size=5,
@@ -244,13 +230,11 @@ if __name__ == "__main__":
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Test dataset size: {len(test_dataset)}")
     
-    # Test a sample
     sample = train_dataset[0]
-    print(f"Context frames shape: {sample['context_frames'].shape}")  # Should be (5, 3, 224, 224)
-    print(f"Reference frames shape: {sample['reference_frames'].shape}")  # Should be (3, 3, 224, 224)
+    print(f"Context frames shape: {sample['context_frames'].shape}")  # (5, 3, 224, 224)
+    print(f"Reference frames shape: {sample['reference_frames'].shape}")  # (3, 3, 224, 224)
     print(f"Label: {sample['label']}")
     
-    # Create DataLoader
     from torch.utils.data import DataLoader
     
     train_loader = DataLoader(
@@ -260,9 +244,8 @@ if __name__ == "__main__":
         collate_fn=dual_backbone_collate_fn
     )
     
-    # Test batch loading
     for context_frames, reference_frames, labels in train_loader:
-        print(f"Batch context frames shape: {context_frames.shape}")  # Should be (4, 5, 3, 224, 224)
-        print(f"Batch reference frames shape: {reference_frames.shape}")  # Should be (4, 3, 3, 224, 224)
-        print(f"Batch labels shape: {labels.shape}")  # Should be (4,)
+        print(f"Batch context frames shape: {context_frames.shape}") # (4, 5, 3, 224, 224)
+        print(f"Batch reference frames shape: {reference_frames.shape}")  # (4, 3, 3, 224, 224)
+        print(f"Batch labels shape: {labels.shape}")  # (4,)
         break

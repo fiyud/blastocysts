@@ -6,7 +6,8 @@ import torchvision.transforms as transforms
 import random
 from model import DualBackboneTimeLapseClassifier
 import torch
-
+import torch.nn as nn
+from typing import Tuple
 class DualTimeLapseDataset(Dataset):
     def __init__(
         self, 
