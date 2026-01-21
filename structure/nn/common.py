@@ -8,14 +8,13 @@ from torch.nn import LayerNorm
 from torch.nn import functional as F
 from torch.nn.init import trunc_normal_
 from einops import rearrange, repeat
-from structure.nn.mamba import *
+from .mamba import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
 
 class PositionalEncoding(nn.Module):
-    """Simple positional encoding for transformer"""
     def __init__(self, d_model: int, max_seq_len: int = 100):
         super().__init__()
         self.d_model = d_model
@@ -85,9 +84,6 @@ class SS2D(nn.Module):
             forward_type="v2",
             **kwargs,
     ):
-        """
-        ssm_rank_ratio would be used in the future...
-        """
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
         d_expand = int(ssm_ratio * d_model)
@@ -132,7 +128,7 @@ class SS2D(nn.Module):
                 padding=(d_conv - 1) // 2,
                 **factory_kwargs,
             )
-
+        
         # rank ratio =====================================
         self.ssm_low_rank = False
         if d_inner < d_expand:
@@ -323,8 +319,7 @@ class XSSBlock(nn.Module):
             # =============================
             use_checkpoint: bool = False,
             post_norm: bool = False,
-            **kwargs,
-    ):
+            **kwargs):
         super().__init__()
 
         self.in_proj = nn.Sequential(

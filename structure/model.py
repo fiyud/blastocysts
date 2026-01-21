@@ -166,7 +166,7 @@ class DualBackboneTimeLapseClassifier(nn.Module):
             mask_reference = mask_reference.long()
             src_key_padding_mask = torch.zeros(batch_size, self.context_size + 1, 
                                              dtype=torch.bool, device=device)
-            src_key_padding_mask[:, -1] = mask_reference.squeeze()
+            src_key_padding_mask[:, -1] = mask_reference.squeeze()  # Mask reference token
         else:
             src_key_padding_mask = None
         
@@ -219,7 +219,6 @@ def replace_submodules(
     predicate: Callable[[nn.Module], bool],
     func: Callable[[nn.Module], nn.Module]
 ) -> nn.Module:
-    """Replace all submodules selected by the predicate with the output of func."""
     if predicate(root_module):
         return func(root_module)
 
@@ -261,13 +260,12 @@ if __name__ == "__main__":
         reference_encoding_size=512
     )
     
-    # Example input
     context_frames = torch.randn(4, 5, 3, 224, 224)  # batch=4, context=5 frames
     reference_frames = torch.randn(4, 3, 3, 224, 224)  # batch=4, reference=3 frames
     
     logits = model(context_frames, reference_frames)
-    print(f"Output shape: {logits.shape}")  # (4, 2)
+    print(f"Output shape: {logits.shape}")
     
     predictions = model.predict(context_frames, reference_frames)
-    print(f"Predictions shape: {predictions.shape}")  # (4, 2)
-    print(f"Sample predictions: {predictions[0].numpy()}")  # Probabilities for first sample
+    print(f"Predictions shape: {predictions.shape}")
+    print(f"Sample predictions: {predictions[0].numpy()}") # Probabilities for first sample

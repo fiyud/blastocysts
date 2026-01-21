@@ -47,7 +47,6 @@ class BaseModel(nn.Module):
         raise NotImplementedError
 
 class NoMaD(nn.Module):
-
     def __init__(self, vision_encoder, 
                        noise_pred_net,
                        dist_pred_net):
@@ -69,7 +68,6 @@ class NoMaD(nn.Module):
             raise NotImplementedError
         return output
 
-
 class DenseNetwork(nn.Module):
     def __init__(self, embedding_dim):
         super(DenseNetwork, self).__init__()
@@ -87,3 +85,4 @@ class DenseNetwork(nn.Module):
         x = x.reshape((-1, self.embedding_dim))
         output = self.network(x)
         return output
+    

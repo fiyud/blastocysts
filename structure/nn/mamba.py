@@ -7,26 +7,26 @@ import torch.nn as nn
 from einops import rearrange, repeat
 from timm.models.layers import DropPath
 
-DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
+# DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 
-try:
-    import selective_scan_cuda_core
-    import selective_scan_cuda_oflex
-    import selective_scan_cuda_ndstate  
-    import selective_scan_cuda_nrow 
-    import selective_scan_cuda
-except:
-    pass
+# try:
+#     import selective_scan_cuda_core
+#     import selective_scan_cuda_oflex
+#     import selective_scan_cuda_ndstate  
+#     import selective_scan_cuda_nrow 
+#     import selective_scan_cuda
+# except:
+#     pass
 
-try:
-    "sscore acts the same as mamba_ssm"
-    import selective_scan_cuda_core
-except Exception as e:
-    print(e, flush=True)
-    "you should install mamba_ssm to use this"
-    SSMODE = "mamba_ssm"
-    import selective_scan_cuda
-    # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
+# try:
+#     "sscore acts the same as mamba_ssm"
+#     import selective_scan_cuda_core
+# except Exception as e:
+#     print(e, flush=True)
+#     "you should install mamba_ssm to use this"
+#     SSMODE = "mamba_ssm"
+#     import selective_scan_cuda
+#     # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 
 class LayerNorm2d(nn.Module):
 
@@ -40,15 +40,13 @@ class LayerNorm2d(nn.Module):
         x = rearrange(x, 'b h w c -> b c h w').contiguous()
         return x
 
-
-def autopad(k, p=None, d=1):  # kernel, padding, dilation
+def autopad(k, p=None, d=1):
     """Pad to 'same' shape outputs."""
     if d > 1:
         k = d * (k - 1) + 1 if isinstance(k, int) else [d * (x - 1) + 1 for x in k]  # actual kernel-size
     if p is None:
         p = k // 2 if isinstance(k, int) else [x // 2 for x in k]  # auto-pad
     return p
-
 
 # Cross Scan
 class CrossScan(torch.autograd.Function):
@@ -70,7 +68,6 @@ class CrossScan(torch.autograd.Function):
         ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
         y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
         return y.view(B, -1, H, W)
-
 
 class CrossMerge(torch.autograd.Function):
     @staticmethod
